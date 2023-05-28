@@ -1,8 +1,11 @@
 load("render.star", "render")
 load("time.star", "time")
+load("encoding/base64.star", "base64")
 
 
 DEFAULT_TIMEZONE = "US/Eastern"
+HEADER_BACKGROUND = "#a90000"
+HEADER_TEXT = "#ffffff"
 
 birthdays = {
     "01-01": ["Portgas D. Ace", "Anjo", "Daz Bones", "Islewan"],
@@ -441,18 +444,20 @@ birthdays = {
 }
 
 
-
 def main():
     now = time.now().in_location(DEFAULT_TIMEZONE)
     now_date = now.format("01-02")
 
     characters = ",\n".join(birthdays[str(now_date)])
+
+    header_text = ""
     marquee_alignment = ""
     if ',' in characters:
+        header_text = "Birthdays Of:"
         marquee_alignment = "left"
     else:
+        header_text = "Birthday Of:"
         marquee_alignment = "center"
-
 
     return render.Root(
         delay = 150,
@@ -460,24 +465,26 @@ def main():
             cross_align = "start",
             children = [
                 render.Box(
-                    color = "#a90000",
+                    color = HEADER_BACKGROUND,
                     height = 9,
                     child = render.Text(
-                        content = "Birthday Of:",
+                        content = header_text,
                         font = "tb-8",
-                        color = "#ffb300",
+                        color = HEADER_TEXT,
                     ),
                 ),
-                render.Marquee(
-                    height = 32,
-                    child = render.WrappedText(
-                        content = characters,
-                        width = 64,
-                        align = marquee_alignment,
-                        # color = ,
+                render.Box(
+                    height = 23,
+                    child = render.Marquee(
+                        height = 23,
+                        child = render.WrappedText(
+                            content = characters,
+                            width = 64,
+                            align = marquee_alignment,
+                        ),
+                        scroll_direction = "vertical",
                     ),
-                    scroll_direction = "vertical",
-                ),
+                )
             ],
         ),
     )
