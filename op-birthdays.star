@@ -446,8 +446,39 @@ def main():
     now = time.now().in_location(DEFAULT_TIMEZONE)
     now_date = now.format("01-02")
 
-    character = birthdays[str(now_date)][0]
+    characters = ",\n".join(birthdays[str(now_date)])
+    marquee_alignment = ""
+    if ',' in characters:
+        marquee_alignment = "left"
+    else:
+        marquee_alignment = "center"
+
 
     return render.Root(
-        child = render.Text(character)
+        delay = 150,
+        child = render.Column(
+            cross_align = "start",
+            children = [
+                render.Box(
+                    color = "#a90000",
+                    height = 9,
+                    child = render.Text(
+                        content = "Birthday Of:",
+                        font = "tb-8",
+                        color = "#ffb300",
+                    ),
+                ),
+                render.Marquee(
+                    height = 32,
+                    child = render.WrappedText(
+                        content = characters,
+                        width = 64,
+                        align = marquee_alignment,
+                        # color = ,
+                    ),
+                    scroll_direction = "vertical",
+                ),
+            ],
+        ),
     )
+    
