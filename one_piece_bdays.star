@@ -1,9 +1,25 @@
+"""
+Applet: One Piece Bdays
+Summary: Today's One Piece Birthday
+Description: Lists all One Piece characters celebrating their birthday today.
+Author: raymbartlett
+"""
+
+load("encoding/json.star", "json")
 load("render.star", "render")
+load("schema.star", "schema")
 load("time.star", "time")
-load("encoding/base64.star", "base64")
 
-
-DEFAULT_TIMEZONE = "US/Eastern"
+DEFAULT_LOCATION = """
+{
+	"lat": "40.6781784",
+	"lng": "-73.9441579",
+	"description": "Brooklyn, NY, USA",
+	"locality": "Brooklyn",
+	"place_id": "ChIJCSF8lBZEwokRhngABHRcdoI",
+	"timezone": "America/New_York"
+}
+"""
 HEADER_BACKGROUND = "#a90000"
 HEADER_TEXT = "#ffffff"
 
@@ -35,7 +51,7 @@ birthdays = {
         "Charlotte Basskarte",
         "Charlotte Dosmarche",
         "Ginrummy",
-        "Roxanne"
+        "Roxanne",
     ],
     "01-24": ["Gild Tesoro", "Ms. Monday", "Kairiken"],
     "01-25": ["Giolla"],
@@ -68,7 +84,7 @@ birthdays = {
         "Road",
         "Cocox",
         "Superhuman Domingos",
-        "Henohenounchi"
+        "Henohenounchi",
     ],
     "02-20": ["Kumadori"],
     "02-21": ["Jigoro", "Charlotte Dragée", "Charlotte Dolce", "Pascia"],
@@ -83,16 +99,16 @@ birthdays = {
         "Charlotte Cracker",
         "Charlotte Custard",
         "Charlotte Angel",
-        "Kazekage"
+        "Kazekage",
     ],
     "02-29": ["Pandaman", "Pandawoman"],
     "03-01": ["Mhinorinoceros"],
     "03-02": [
         "Vinsmoke Ichiji",
         "Vinsmoke Niji",
-        "Sanji",
+        "Vinsmoke Sanji",
         "Vinsmoke Yonji",
-        "Sanjuan Wolf"
+        "Sanjuan Wolf",
     ],
     "03-03": ["Galdino", "Hina", "O-Tama"],
     "03-04": ["Masira", "Minotaurs"],
@@ -311,7 +327,7 @@ birthdays = {
         "Charlotte Cabaletta",
         "Charlotte Gala",
         "Drug Peclo",
-        "Pinky"
+        "Pinky",
     ],
     "09-30": ["Avalo Pizarro"],
     "10-01": ["Comile", "Mohji"],
@@ -336,7 +352,7 @@ birthdays = {
         "Charlotte Galette",
         "Charlotte Poire",
         "Sea Bunny",
-        "Charlotte Anglais"
+        "Charlotte Anglais",
     ],
     "10-20": ["Tyrannosaurus"],
     "10-21": ["Vito", "Sam"],
@@ -371,7 +387,7 @@ birthdays = {
         "Charlotte Marble",
         "Charlotte Myukuru",
         "Charlotte Maple",
-        "Moodie"
+        "Moodie",
     ],
     "11-18": ["Higuma"],
     "11-19": ["Brontosaurus", "Onimaru"],
@@ -399,7 +415,7 @@ birthdays = {
         "Charlotte Akimeg",
         "Charlotte Allmeg",
         "Charlotte Harumeg",
-        "Charlotte Fuyumeg"
+        "Charlotte Fuyumeg",
     ],
     "12-03": ["Bell-mère"],
     "12-04": ["Jorl"],
@@ -413,7 +429,7 @@ birthdays = {
         "Charlotte Mondée",
         "Charlotte Amande",
         "Charlotte Hachée",
-        "Charlotte Effilée"
+        "Charlotte Effilée",
     ],
     "12-11": ["The Yeti Cool Brothers", "Mr. Shimizu", "Speed"],
     "12-12": ["Don Chinjao", "Nezumi", "King"],
@@ -424,7 +440,7 @@ birthdays = {
         "Inuppe",
         "Charlotte Moscato",
         "Charlotte Mash",
-        "Charlotte Cornstarch"
+        "Charlotte Cornstarch",
     ],
     "12-17": ["Banchina", "Yuki"],
     "12-18": ["Zunisha", "Byron"],
@@ -440,19 +456,20 @@ birthdays = {
     "12-28": ["Jango"],
     "12-29": ["Du Feld"],
     "12-30": ["Absalom"],
-    "12-31": ["Gol D. Roger"]
+    "12-31": ["Gol D. Roger"],
 }
 
-
-def main():
-    now = time.now().in_location(DEFAULT_TIMEZONE)
-    now_date = now.format("01-02")
+def main(config):
+    location = config.get("location") or DEFAULT_LOCATION
+    loc = json.decode(location)
+    timezone = loc["timezone"]
+    now_date = time.now().in_location(timezone).format("01-02")
 
     characters = ",\n".join(birthdays[str(now_date)])
 
     header_text = ""
     marquee_alignment = ""
-    if ',' in characters:
+    if "," in characters:
         header_text = "Birthdays Of:"
         marquee_alignment = "left"
     else:
@@ -484,8 +501,20 @@ def main():
                         ),
                         scroll_direction = "vertical",
                     ),
-                )
+                ),
             ],
         ),
     )
-    
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Location(
+                id = "location",
+                name = "Location",
+                desc = "Location for which to set time zone.",
+                icon = "locationDot",
+            ),
+        ],
+    )
